@@ -1,0 +1,216 @@
+syntax = "proto3";
+option go_package = ".;protobuffer_def";
+
+import "google/protobuf/any.proto";
+
+
+// protoc ./protobuffer_def/status-service.proto  --proto_path=./protobuffer_def/ --micro_out=./protobuffer_def/ --go_out=plugins=grpc:./protobuffer_def/
+service StatusServer {
+    rpc BaseInterface(BaseRequest) returns (BaseResponse) {}
+}
+
+enum CMD {
+    REGISTER_STATUS                                    = 0;       //注册状态
+    QUERY_STATUS                                       = 1;       //查询状态
+    CREATE_CHAT_ROOM                                   = 2;       //创建聊天室
+    UPDATE_OFF_LINE                                    = 3;       //更新离线状态
+    DEL_CHAT_ROOM                                      = 4;       //删除聊天室
+    SINGLE_CALL_NOTIFY                                 = 5;       //呼叫通知
+    FORCE_TERMINAL_NOTIFY                              = 6;       //通知服务器强制中断通话
+    SINGLE_ANSWER_SIG_TO_SIG                           = 7;       //呼叫应答
+    GET_CHAT_ROOM_REQ                                  = 8;       //获取聊天室信息请求
+    SINGLE_REFUSE_SIG_TO_SIG                           = 9;       //被叫方服务器拒绝接听
+    HANG_UP_SIG_TO_SIG                                 = 10;      //主叫方挂断
+    TERMINAL_SIG_TO_SIG                                = 11;      //任一方终止通话
+    OFFER_CALL_SIG_TO_SIG                              = 12;      //主叫方发送offer
+    OFFER_ANSWER_SIG_TO_SIG                            = 13;      //被叫方发送answer
+    ICE_CALL_SIG_TO_SIG                                = 14;      //主叫方发送ice
+    ICE_ANSWER_SIG_TO_SIG                              = 15;      //被叫方发送ice
+    CMD_MEDIA_TO_AUDIO                                 = 16;      //媒体转语音
+    CMD_KICK_USER                                      = 17;      //他服踢人操作
+    UPDATE_ON_LINE                                     = 18;      //更新在线状态
+}
+
+ enum ReturnCode {
+    SUCCESS                                            = 0;       //成功
+    UNKOWN_CMD                                         = 1;       //未知的指令
+    BODY_IS_NULL                                       = 2;       //body为空
+    DESERIALIZATION_ERROR                              = 3;       //反序列化异常
+    SERIALIZATION_ERROR                                = 4;       //序列化异常
+    UNKOWN_ERROR                                       = 5;       //未知错误
+}
+
+message BaseRequest {
+    string                   requestId                 = 1;       //请求ID
+    CMD                      c                         = 2;       //请求指令
+    google.protobuf.Any      body                      = 3;       //参数
+}
+
+message BaseResponse {
+    string                    requestId                = 1;       //响应ID
+    ReturnCode                code                     = 2 ;      //状态码
+    string                    desc                     = 3;       //描述
+    CMD                       c                        = 4;       //指令
+    google.protobuf.Any       body                     = 5;       //响应结构体
+}
+
+//注册状态       请求
+message RegisterStatusRequest {
+   
+    string                    identity               = 1;       //帐号唯一标识
+    repeated string           room_list              = 2;       //人员居住的房间号
+    string                    phone                  = 3;       //电话号    
+    string                    user_name              = 4;       //用户名  
+    string                    user_avator            = 5;       //用户头像    
+    string                    register_info          = 6;       //注册信息
+}
+//注册状态        响应
+message RegisterStatusResponse {
+}
+
+//查询设备状态    请求
+message QueryStatusRequest {
+      string                  identity                  = 1;       //帐号唯一标识
+}
+//查询设备状态    响应
+message QueryStatusResponse {
+    string                    identity               = 1;       //帐号唯一标识
+    repeated string           room_list              = 2;       //人员居住的房间号
+    string                    phone                  = 3;       //电话号    
+    string                    user_name              = 4;       //用户名  
+    string                    user_avator            = 5;       //用户头像
+    int32                     state                  = 6;       //用户状态，忙碌还是空闲
+    string                    chat_room_id           = 7;       //聊天室id
+	int64                     last_chat              = 8;       //上次聊天时间
+    string                    reg_addr               = 9;       //用户所属服务器地址
+	bool                      off_line               = 10;      //用户是否离线，离线为true，在线为false
+}
+
+//创建聊天室 请求
+message CreateChatRoomReq {
+    string caller  = 1;  //呼叫方
+    string answer  = 2;  //被叫方
+}
+
+//创建聊天室 响应
+message CreateChatRoomRsp{
+    string caller  = 1;  //呼叫方
+    string answer  = 2;  //被叫方
+    string chat_room_id = 3;  //聊天室id
+}
+
+//更新离线状态 请求
+message UpdateOfflineReq{
+    string identity = 1; //用户id
+}
+
+//更新离线状态 响应
+message UpdateOfflineRsp{
+    
+}
+
+//删除聊天室 请求
+message DelChatRoomReq {
+    string chat_room_id = 1;  //聊天室id
+}
+
+//删除聊天室 响应
+message DelChatRoomRsp {
+    
+}
+
+//强制中断通话请求
+message ForceTerminateNotify {
+    string chat_room_id = 1;
+    string other_id = 2;
+}
+
+//answer的sig服务器将应答结果通知主叫方sig服务器
+message SingleAnswerSigToSig {
+    string chat_room_id = 1;   //聊天室id
+    string device_model = 2;   //设备类型
+    string caller_id  = 3;     //主叫方id
+    string answer_id  = 4;     //被叫方id
+}
+
+//获取聊天室信息 请求
+message GetChatRoomReq {
+    string chat_room_id = 1;  //聊天室id
+}
+
+//获取聊天室信息 响应
+message GetChatRoomRsp {
+    string caller  = 1;        //呼叫方
+    string answer  = 2;        //被叫方
+    string chat_room_id = 3;   //聊天室id
+}
+
+//被叫方的sig服务器拒绝接听，发送给主叫方sig服务器
+message SingleRefuseSigToSig {
+    string chat_room_id = 1;   //聊天室id
+    string caller_id  = 2;     //主叫方id
+    string answer_id  = 3;     //被叫方id
+}
+
+//主叫方挂断，主叫方服务器发送给被叫方服务器
+message HangUpSigToSig {
+    string chat_room_id = 1;  //聊天室id
+    string answer_id = 2;    //被叫方id
+}
+
+//任一方挂断，挂断方的服务器通知另一方
+message SingleTerminal{
+    string chat_room_id = 1; //聊天室id
+    string cancel_id = 2;    //终止方id
+    string be_canceled_id = 3; //被终止的一方 
+}
+
+//主叫方发送offer
+message OfferCall{
+    string chat_room_id = 1; //聊天室id
+    string caller_id = 2; //主叫方id
+    string answer_id = 3; //被叫方id
+    string sdp = 4;       //sdp信息
+}
+
+//被叫方发送offer
+message OfferAnswer{
+    string chat_room_id = 1; //聊天室id
+    string caller_id = 2; //主叫方id
+    string answer_id = 3; //被叫方id
+    string sdp = 4;       //sdp信息
+}
+
+//主叫方发送ice
+message IceCall {
+    string chat_room_id = 1;                      //聊天室id
+	string caller_id = 2;                         //主叫方id
+    string answer_id = 3;                         //被叫方id
+    string ice_candidate = 4;                    //ice数据参数
+}
+
+//被叫方发送ice
+message IceAnswer {
+    string chat_room_id = 1;                      //聊天室id
+	string caller_id = 2;                         //主叫方id
+    string answer_id = 3;                         //被叫方id
+    string ice_candidate = 4;                    //ice数据参数
+}
+
+//媒体转化为音频
+message MediaToAudio {
+    string chat_room_id = 1;              //聊天室id
+    string convert_id = 2;                //发起转换人id
+    string be_convert_id = 3;             //被转换人id
+}
+
+//踢人通知
+message KickPerson {
+    string user_id = 1;                 //用户id
+}
+
+//更新在线状态
+message UpdateOnline {
+    string user_id = 1;     //用户id
+    string reg_addr = 2;    //服务器地址
+}

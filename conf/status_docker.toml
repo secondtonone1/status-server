@@ -1,0 +1,33 @@
+title = "login toml config file"
+
+[base]
+    grpc_addr = "0.0.0.0:9090"
+    service_name = "status-service"
+    root_dir = "/data/status-server"
+    var_dir = "/data/status-server"
+[log_conf]
+    project = "status"
+    name = "main"
+    log_dir  = "log"
+    log_level = "info"
+    max_day = 7
+    rotate_seconds = 3600
+    extname=""
+
+[register_center]
+    address = ["0.0.0.0:2181"]
+    timeout = 5
+
+[redis_conf]
+    lua_path="/data/status-server/src/resources"
+    redis_model = 1
+    single_redis_host="0.0.0.0:65530"
+    single_redis_db = 0
+    single_redis_PoolSize=50
+    single_redis_MinIdleConns=50
+    single_redis_password=""
+
+    cluster_redis_host=["172.31.1.20:30000", "172.31.1.20:30001", "172.31.1.20:30002", "172.31.1.20:30003", "172.31.1.20:30004", "172.31.1.20:30005", "172.31.1.20:30006"]
+    cluster_redis_PoolSize=50
+    cluster_redis_MinIdleConns=50
+    cluster_redis_password=""

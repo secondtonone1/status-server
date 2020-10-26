@@ -1,0 +1,24 @@
+syntax = "proto3";
+option go_package = ".;protobuffer_def";
+
+import "google/protobuf/any.proto";
+import "status-service.proto";
+
+// protoc ./protobuffer_def/comsig-service.proto  --proto_path=./protobuffer_def/ --micro_out=./protobuffer_def/ --go_out=plugins=grpc:./protobuffer_def/
+service ComSigServer {
+    rpc BaseInterface(BaseRequest) returns (BaseResponse) {}
+}
+
+
+//呼叫通知
+message SingleCallNotify {
+    string caller_id = 1;
+    string caller_name = 2;
+	string caller_phone = 3;
+	string caller_avator = 4;
+	string media_type = 5;
+	string chat_room_id = 6;
+	string device_model = 7;
+    string answer_id = 8;
+}
+
